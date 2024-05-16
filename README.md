@@ -1,2 +1,214 @@
 # Metrics-for-Volatility
-This was part of a project I did for my class Malware and Memory Forensics where I created a volatility plugin to pull several different metrics from benign and infected memory dumps to gather data to be used in a classification model to quickly classify  
+This was part of a project I did for my class CMSC 654 Malware and Memory Forensics where I created a volatility plugin to pull several different metrics from Benign and Malware infected memory dumps to gather data to be used in a classification model. This would help detectives in prioritising certain memory dumps over others and provide analytics to start from when conducting an investigation. 
+
+## Requirements
+- Work within Ubuntu 64-bit
+- Restricted to Volatility 2
+- Restricted to Python 2
+
+## Project **Description**
+The increasing complexity of cyber threats and the abundance of personal digital devices have led to a surge in the volume of digital forensic investigations. Memory forensics is a crucial aspect of incident response and digital forensics, often requiring the analysis of multiple memory dumps which can drastically increase investigative resources. This project proposes the development of a machine learning-based solution to prioritize memory dumps which will optimize the allocation of forensic resources and improve the efficiency of investigations.
+
+Introducing Metrics: a Volatility plugin with the goal to utilize just about every aspect of volatility to produce metrics about multiple given memory dumps in order to classify each as either benign or malicious using a binary classification machine learning model. How Metrics works is by utilizing 9 different plugins: pslist, dlllist, handles, ldrmodules, malfind, psxview, modules, svcscan, and callbacks to get a profile of the given memory dumps, and feeds each dumps profile into the ML model for prediction. To train the model I looked for datasets containing labeled memory dumps and found a dataset called “Malware Detection from Memory Dump” with 58 features and about 58.6k entries. The data is evenly split between 29,298 Benign and 29,298 Malware labeled dumps, but the infected dumps could contain any of the popular Trojan Horse, Spyware, or Ransomware attacks such as Zeus, Emotet, Refroso, scar, Reconys, 180Solutions, Coolwebsearch, Gator, Transponder, TIBS, Conti, MAZE, Pysa, Ako, and Shade. 
+
+I’ve included a list of the features and a short **Description** about each one at the end of this paper as a reference. Not all features are included in the project due to time constraints but I was able to get about 20 different metrics of the 58 provided in the data. Other issues with the project include working with different versions of Volatility. I used VMWare Fusion to setup the environment and an image provided from the class labs to setup for testing. One other issue is that Volatility 2 worked only with Python 2 and the ML model needed Python 3 so I couldn’t automatically feed the output of Metrics to the model in the vm; it had to be done manually. Another issue I ran into is that Volatility doesn’t normally support running multiple memory dumps from one command so the metrics of each dump would have to be obtained individually or more work would be needed to add that feature. Time also became an expanding issue as when building it I mainly focused on getting a working plugin rather than optimizing the plugin so getting the metrics of a memory dump take quite a bit of time, so far for the 20 features it can take about 37 seconds for a small memory dump to be analyzed. These can each be improved upon with future work and research.
+
+## Data Pulled
+### Metrics Currently Pulled
+- Number of processes
+- Number of PPID’s
+- Average number of threads per process
+- Number of 64-bit processes
+- Average number of handles per process
+- Number of DLLs listed
+- Average number of DLL’s per process
+- Total number of handles
+- Average number of handles per process
+- Number of file handles
+- Number of event handles
+- Number of desktop handles
+- Number of key handles
+- Number of thread handles
+- Number of directory handles
+- Number of semaphore handles
+- Number of timer handles
+- Number of section handles
+- Number of mutant handles
+- Number of injections
+- Commit charges
+
+### Data Features, Type, & Description
+- **Raw_Type**:
+  - **Description**: Indicates if the data row is benign or malicious.
+  - **Data Type**: String (Categorical: "benign" or "malicious").
+- **pslist_nproc**:
+  - **Description**: Number of processes listed in the pslist plugin.
+  - **Data Type**: Integer.
+- **pslist_nppid**:
+  - **Description**: Number of parent process IDs listed in the pslist plugin.
+  - **Data Type**: Integer.
+- **pslist_avg_threads**:
+  - **Description**: Average number of threads per process listed in the pslist plugin.
+  - **Data Type**: Float.
+- **pslist_nprocs64bit**:
+  - **Description**: Number of 64-bit processes listed in the pslist plugin.
+  - **Data Type**: Integer.
+- **pslist_avg_handlers**:
+  - **Description**: Average number of handles per process listed in the pslist plugin.
+  - **Data Type**: Float.
+- **dlllist_ndlls**:
+  - **Description**: Number of DLLs listed in the dlllist plugin.
+  - **Data Type**: Integer.
+- **dlllist_avg_dlls_per_proc**:
+  - **Description**: Average number of DLLs per process listed in the dlllist plugin.
+  - **Data Type**: Float.
+- **handles_nhandles**:
+  - **Description**: Total number of handles.
+  - **Data Type**: Integer.
+- **Handles_avg_handles_per_proc**:
+  - **Description**: Average number of handles per process.
+  - **Data Type**: Float.
+- **Handles_nport**:
+  - **Description**: Number of port handles.
+  - **Data Type**: Integer.
+- **Handles_nfile**:
+  - **Description**: Number of file handles.
+  - **Data Type**: Integer.
+- **Handles_nevent**:
+  - **Description**: Number of event handles.
+  - **Data Type**: Integer.
+- **Handles_ndesktop**:
+  - **Description**: Number of desktop handles.
+  - **Data Type**: Integer.
+- **Handles_nkey**:
+  - **Description**: Number of key handles.
+  - **Data Type**: Integer.
+- **Handles_nthread**:
+  - **Description**: Number of thread handles.
+  - **Data Type**: Integer.
+- **Handles_ndirectory**:
+  - **Description**: Number of directory handles.
+  - **Data Type**: Integer.
+- **Handles_nsemaphore**:
+  - **Description**: Number of semaphore handles.
+  - **Data Type**: Integer.
+- **Handles_ntimer**:
+  - **Description**: Number of timer handles.
+  - **Data Type**: Integer.
+- **Handles_nsection**:
+  - **Description**: Number of section handles.
+  - **Data Type**: Integer.
+- **Handles_nmutant**:
+  - **Description**: Number of mutant handles.
+  - **Data Type**: Integer.
+- **Ldrmodules_not_in_load**:
+  - **Description**: Number of modules not in the load phase.
+  - **Data Type**: Integer.
+- **Ldrmodules_not_in_init**:
+  - **Description**: Number of modules not in the init phase.
+  - **Data Type**: Integer.
+- **Ldrmodules_not_in_mem**:
+  - **Description**: Number of modules not in the memory image.
+  - **Data Type**: Integer.
+- **Ldrmodules_not_in_load_avg**:
+  - **Description**: Average number of modules not in the load phase.
+  - **Data Type**: Float.
+- **Ldrmodules_not_in_init_avg**:
+  - **Description**: Average number of modules not in the init phase.
+  - **Data Type**: Float.
+- **Ldrmodules_not_in_mem_avg**:
+  - **Description**: Average number of modules not in the memory image.
+  - **Data Type**: Float.
+- **Malfind_ninjections**:
+  - **Description**: Number of injections found by the malfind plugin.
+  - **Data Type**: Integer.
+- **malfind_commitCharge**:
+  - **Description**: Commit charge found by the malfind plugin.
+  - **Data Type**: Integer.
+- **Malfind_protection**:
+  - **Description**: Protection found by the malfind plugin.
+  - **Data Type**: Integer.
+- **malfind_uniqueInjections**:
+  - **Description**: Number of unique injections found by the malfind plugin.
+  - **Data Type**: float64.
+- **Psxview_not_in_pslist**:
+  - **Description**: Number of processes not in the pslist plugin according to psxview.
+  - **Data Type**: Integer.
+- **Psxview_not_in_eprocess_pool**:
+  - **Description**: Number of processes not in the eprocess pool according to psxview.
+  - **Data Type**: Integer.
+- **Psxview_not_in_ethread_pool**:
+  - **Description**: Number of threads not in the ethread pool according to psxview.
+  - **Data Type**: Integer.
+- **Psxview_not_in_pspcid_list**:
+  - **Description**: Number of processes not in the pspcid list according to psxview.
+  - **Data Type**: Integer.
+- **Psxview_not_in_csrss_handles**:
+  - **Description**: Number of processes not in the CSRSS handles according to psxview.
+  - **Data Type**: Integer.
+- **Psxview_not_in_session**:
+  - **Description**: Number of processes not in the session according to psxview.
+  - **Data Type**: Integer.
+- **Psxview_not_in_deskthrd**:
+  - **Description**: Number of processes not in the desktop thread according to psxview.
+  - **Data Type**: Integer.
+- **Psxview_not_in_pslist_false_avg**:
+  - **Description**: Average number of false positives for processes not in the pslist plugin according to psxview.
+  - **Data Type**: Float.
+- **Psxview_not_in_eprocess_pool_false_avg**:
+  - **Description**: Average number of false positives for processes not in the eprocess pool according to psxview.
+  - **Data Type**: Float.
+- **Psxview_not_in_ethread_pool_false_avg**:
+  - **Description**: Average number of false positives for threads not in the ethread pool according to psxview.
+  - **Data Type**: Float.
+- **Psxview_not_in_pspcid_list_false_avg**:
+  - **Description**: Average number of false positives for processes not in the pspcid list according to psxview.
+  - **Data Type**: Float.
+- **Psxview_not_in_csrss_handles_false_avg**:
+  - **Description**: Average number of false positives for processes not in the CSRSS handles according to psxview.
+  - **Data Type**: Float.
+- **Psxview_not_in_session_false_avg**:
+  - **Description**: Average number of false positives for processes not in the session according to psxview.
+  - **Data Type**: Float.
+- **Psxview_not_in_deskthrd_false_avg**:
+  - **Description**: Average number of false positives for processes not in the desktop thread according to psxview.
+  - **Data Type**: Float.
+- **Modules_nmodules**:
+  - **Description**: Number of modules.
+  - **Data Type**: Integer.
+- **Svcscan_nservices**:
+  - **Description**: Number of services.
+  - **Data Type**: Integer.
+- **Svcscan_kernel_drivers**:
+  - **Description**: Number of kernel drivers.
+  - **Data Type**: Integer.
+- **Svcscan_fs_drivers**:
+  - **Description**: Number of file system drivers.
+  - **Data Type**: Integer.
+- **Svcscan_process_services**:
+  - **Description**: Number of process services.
+  - **Data Type**: Integer.
+- **Svcscan_shared_process_services**:
+  - **Description**: Number of shared process services.
+  - **Data Type**: Integer.
+- **Svcscan_interactive_process_services**:
+  - **Description**: Number of interactive process services.
+  - **Data Type**: Integer.
+- **Svcscan_nactive**:
+  - **Description**: Number of active services.
+  - **Data Type**: Integer.
+- **Callbacks_ncallbacks**:
+  - **Description**: Number of callbacks.
+  - **Data Type**: Integer.
+- **Callbacks_nanonymous**:
+  - **Description**: Number of anonymous callbacks.
+  - **Data Type**: Integer.
+- **SubType**:
+  - **Description**: Classifies the data into benign, spyware, or other.
+  - **Data Type**: String (Categorical: "benign," "spyware," or "other").
+- **Callbacks_ngeneric**:
+  - **Description**: Number of generic callbacks.
+  - **Data Type**: Integer.
+- **Label**:
+  - **Description**: Indicates if the data row is labeled as benign or malware.
+  - **Data Type**: String (Categorical: "benign" or "malware").
